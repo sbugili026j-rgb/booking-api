@@ -6,8 +6,11 @@ REST API for reserving rooms, built with Python and FastAPI.
 - User registration and login with JWT tokens
 - Passwords hashed with bcrypt, never stored as plain text
 - Create and list bookable rooms
-- Input validation with clear error codes (409 duplicate email, 401 wrong login, 422 invalid data)
-- Automated tests with pytest
+- Book a room for a time slot (login required)
+- Double-booking prevention: overlapping times are rejected with a 409 error, while back-to-back bookings are allowed
+- Cancel a booking; users can only see and cancel their own
+- Input validation with clear error codes (409 conflict, 401 wrong login, 404 not found, 422 invalid data)
+- 13 automated tests with pytest
 
 ## Tech stack
 Python, FastAPI, SQLAlchemy, SQLite, pytest
@@ -25,13 +28,15 @@ python -m pytest
 ```
 
 ## Endpoints
-| Method | Path | What it does |
-|---|---|---|
-| POST | /auth/register | Create an account |
-| POST | /auth/login | Log in and get a token |
-| GET | /resources | List rooms |
-| POST | /resources | Create a room |
+| Method | Path | Login needed | What it does |
+|---|---|---|---|
+| POST | /auth/register | No | Create an account |
+| POST | /auth/login | No | Log in and get a token |
+| GET | /resources | No | List rooms |
+| POST | /resources | No | Create a room |
+| POST | /bookings | Yes | Book a room for a time slot |
+| GET | /bookings/me | Yes | List your own bookings |
+| DELETE | /bookings/{id} | Yes | Cancel your booking |
 
 ## Coming next
-- Bookings with double-booking prevention
 - Admin-only room creation

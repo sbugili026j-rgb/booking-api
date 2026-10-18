@@ -28,3 +28,12 @@ def client():
     app.dependency_overrides[get_db] = override_get_db
     yield TestClient(app)
     app.dependency_overrides.clear()
+
+
+@pytest.fixture()
+def admin_headers(client, monkeypatch):
+    monkeypatch.setenv("ADMIN_EMAIL", "admin@gmail.com")
+    body = {"email": "admin@gmail.com", "password": "strongpass123"}
+    client.post("/auth/register", json=body)
+    token = client.post("/auth/login", json=body).json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}

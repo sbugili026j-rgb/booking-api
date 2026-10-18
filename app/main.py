@@ -1,3 +1,4 @@
+import os
 from datetime import timezone
 
 from fastapi import FastAPI, Depends, HTTPException
@@ -23,7 +24,11 @@ def list_resources(db: Session = Depends(get_db)):
 
 
 @app.post("/resources", response_model=schemas.ResourceOut, status_code=201)
-def create_resource(data: schemas.ResourceCreate, db: Session = Depends(get_db)):
+def create_resource(
+    data: schemas.ResourceCreate,
+    db: Session = Depends(get_db),
+    admin: models.User = Depends(auth.get_admin_user),
+):
     resource = models.Resource(**data.model_dump())
     db.add(resource)
     db.commit()
@@ -36,9 +41,12 @@ def register(data: schemas.UserCreate, db: Session = Depends(get_db)):
     existing = db.query(models.User).filter(models.User.email == data.email).first()
     if existing:
         raise HTTPException(status_code=409, detail="Email already registered")
+    admin_email = os.environ.get("ADMIN_EMAIL", "").strip().lower()
+    role = "admin" if admin_email and data.email.lower() == admin_email else "user"
     user = models.User(
         email=data.email,
         hashed_password=auth.hash_password(data.password),
+        role=role,
     )
     db.add(user)
     db.commit()

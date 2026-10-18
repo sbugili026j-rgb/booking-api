@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
@@ -35,3 +37,20 @@ class LoginRequest(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+class BookingCreate(BaseModel):
+    resource_id: int
+    start_time: datetime
+    end_time: datetime
+
+
+class BookingOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    user_id: int
+    resource_id: int
+    start_time: datetime
+    end_time: datetime
+    status: str
